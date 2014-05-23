@@ -1,20 +1,50 @@
 
 
 make_model <- function(model, restrictions = NULL, bounds = NULL, starting_values = NULL, is_file = FALSE, is_file_restrictions = FALSE) {
+  # read model:
   model_list <- make_model_list(model)
+  # parameters that will be dsiplayed in the output:
+  parameters_show <- model_list[["parameter"]]
+  # handle restrictions:
+  if (!is.null(restrictions)) {
+    NULL # restriction handling here
+    # make new model_list
+  }
+  ## local variables for easy programming:
+  n_parameter <- length(model_list[["parameter"]])
+  
+  # make functions (prediction, likelihood, ...)
   predict <- predict_model(model_list)
   objective <- llk_model(model_list)
   likelihood <- tryCatch(make.llk.function(model_list[["model_list"]]), error = function(e) {warning("likelihood function cannot be build"); NULL})
   gradient <- tryCatch(gradient_model(make.llk.gradient(likelihood, model_list[["parameter"]]), model_list), error = function(e) {message("gradient function cannot be build (probably derivation failure, see ?D)\n Only numerical gradient available."); NULL})
   hessian <- tryCatch(hessian_model(make.llk.hessian(likelihood, model_list[["parameter"]]), model_list), error = function(e) {message("Hessian function cannot be build (probably derivation failure, see ?D)\n Only numerical Hessian available."); NULL})
-  browser()
-  par_sdt <- c(-1, -0.5, 0, 0.5, 1, 1, 1)
-  objective(par_sdt)
-  gradient(par_sdt)
-  hessian(par_sdt)
-  gradient(runif(3))
-  hessian(runif(3))
   
+  # create bounds:
+  if (is.null(bounds)) {
+    bounds <- list(
+      lower_bound = rep(0, n_parameter),
+      upper_bound = rep(1, n_parameter)
+      )
+  }
+  if (is.null(starting_values)) {
+    starting_values <- list(
+      start_lower = rep(0.1, n_parameter),
+      start_upper = rep(0.9, n_parameter)
+      )
+  }
+  
+  # return CmmcMod object:
+  new("CmmcMod",
+      predict = predict,
+      objective = objective,
+      gradient = gradient,
+      hessian = hessian,
+      model = model_list,
+      bounds = c(bounds, starting_values),
+      parameters_show = parameters_show,
+      restrictions = NULL      
+      )
 }
 
 

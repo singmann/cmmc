@@ -1,6 +1,16 @@
 load_all()
 
-make_model(mod1)
+mpt1 <- make_model(mod1)
+
+data(rb.fig1.data, package = "MPTinR")
+
+fit(mpt1, rb.fig.data)
+
+fit_nlminb(mpt1, rb.fig1.data[1,], runif(3))
+
+get_start_values(mpt1@bounds, 1)
+
+sum(mpt1@predict(runif(3)))
 
 make_model(sdt1)
 

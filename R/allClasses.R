@@ -21,6 +21,7 @@ setClass("CmmcMod",
            objective = "function",
            gradient = "OptionalFunction",
            hessian = "OptionalFunction",
-           free_parameter = "list",
-           restrictions = "OptionalList",
-           model = "list"))
+           bounds = "list",
+           model = "list",
+           parameters_show = "character",
+           restrictions = "OptionalList"))
