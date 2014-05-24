@@ -1,6 +1,25 @@
+require(devtools)
 load_all()
 
 mpt1 <- make_model(mod1)
+mpt2 <- make_model_cmp(mod1)
+mpt3 <- make_model_env(mod1)
+mpt4 <- make_model_env_cmp(mod1)
+mpt5 <- make_model_env2_cmp(mod1)
+
+p1 <- runif(3)
+
+mpt3@predict(p1)
+mpt3@objective(p1)
+mpt3@gradient(p1)
+mpt3@hessian(p1)
+
+mpt1@predict(p1)
+mpt1@objective(p1)
+mpt1@gradient(p1)
+mpt1@hessian(p1)
+
+ls.str(as.list(environment(mpt3@objective))[[1]])
 
 data(rb.fig1.data, package = "MPTinR")
 

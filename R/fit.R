@@ -46,5 +46,7 @@ fit_nlminb <- function(model, data, start, use_gradient = TRUE, use_hessian = FA
     parameter = tmp$par, 
     objective = tmp$objective, 
     convergence = if (tmp$convergence == 0) TRUE else FALSE,
+    use_gradient = use_gradient,
+    use_hessian = use_hessian,
     return = tmp)
 }

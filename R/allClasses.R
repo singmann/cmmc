@@ -25,3 +25,15 @@ setClass("CmmcMod",
            model = "list",
            parameters_show = "character",
            restrictions = "OptionalList"))
+
+setClass("CmmcModEnv", 
+         slots = list(
+           predict = "function",
+           objective = "function",
+           gradient = "OptionalFunction",
+           hessian = "OptionalFunction",
+           model_environment = "environment",
+           bounds = "list",
+           model = "list",
+           parameters_show = "character",
+           restrictions = "OptionalList"))
