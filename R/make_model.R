@@ -1,7 +1,7 @@
 
 
 make_model <- function(model, restrictions = NULL, bounds = NULL, starting_values = NULL, is_file = FALSE, is_file_restrictions = FALSE) {
-  # read model:
+# read model:
   model_list <- make_model_list(model)
   # parameters that will be dsiplayed in the output:
   parameters_show <- model_list[["parameter"]]
@@ -12,13 +12,28 @@ make_model <- function(model, restrictions = NULL, bounds = NULL, starting_value
   }
   ## local variables for easy programming:
   n_parameter <- length(model_list[["parameter"]])
+  n_item_type <- vapply(model_list[["model_list"]], length, 0)
   
+  model_environment <- new.env()
+  #browser()
+  #assign("model_list", model_list[["model_list"]], envir=model_environment)
+  assign("unlist_model_list", unlist(model_list[["model_list"]]), envir=model_environment)
+  assign("parameter", model_list[["parameter"]], envir=model_environment)
+  assign("length_parameter", length(model_list[["parameter"]]), envir=model_environment)
+  assign("n_item_type", n_item_type, envir=model_environment)
+  assign("data", rep(1, sum(n_item_type))/rep(n_item_type, times = n_item_type), envir=model_environment)
+  for (d in seq_along(model_environment[["data"]])) assign(paste("cmmc_data.", d, sep = ""), model_environment[["data"]][d], envir = model_environment)
+  
+  #ls.str(envir = model_environment)
   # make functions (prediction, likelihood, ...)
-  predict <- predict_model(model_list)
-  objective <- llk_model(model_list)
-  likelihood <- tryCatch(make.llk.function(model_list[["model_list"]]), error = function(e) {warning("likelihood function cannot be build"); NULL})
-  gradient <- tryCatch(gradient_model(make.llk.gradient(likelihood, model_list[["parameter"]]), model_list), error = function(e) {message("gradient function cannot be build (probably derivation failure, see ?D)\n Only numerical gradient available."); NULL})
-  hessian <- tryCatch(hessian_model(make.llk.hessian(likelihood, model_list[["parameter"]]), model_list), error = function(e) {message("Hessian function cannot be build (probably derivation failure, see ?D)\n Only numerical Hessian available."); NULL})
+  predict <- predict_model(model_environment)
+  objective <- llk_model(model_environment)
+  likelihood <- tryCatch(make.llk.function(model_list[["model_list"]]), error = function(e) {warning("likelihood function cannot be build, please report example."); NULL})
+  assign("llk.gradient", tryCatch(make.llk.gradient(likelihood, model_list[["parameter"]]), error = function(e) {message("gradient function cannot be build (probably derivation failure, see ?D)\n Only numerical gradient available."); NULL}), envir=model_environment)
+  assign("llk.hessian", tryCatch(make.llk.hessian(likelihood, model_list[["parameter"]]), error = function(e) {message("Hessian function cannot be build (probably derivation failure, see ?D)\n Only numerical Hessian available."); NULL}), envir=model_environment)
+  
+  gradient <- if (!is.null(model_environment[["llk.gradient"]])) gradient_model(model_environment) else NULL
+  hessian <- if (!is.null(model_environment[["llk.hessian"]])) hessian_model(model_environment) else NULL
   
   # create bounds:
   if (is.null(bounds)) {
@@ -36,16 +51,16 @@ make_model <- function(model, restrictions = NULL, bounds = NULL, starting_value
   
   # return CmmcMod object:
   new("CmmcMod",
-      predict = predict,
-      objective = objective,
-      gradient = gradient,
-      hessian = hessian,
+      predict = compiler::cmpfun(predict),
+      objective = compiler::cmpfun(objective),
+      gradient = compiler::cmpfun(gradient),
+      hessian = compiler::cmpfun(hessian),
+      model_environment = model_environment,
       model = model_list,
       bounds = c(bounds, starting_values),
       parameters_show = parameters_show,
-      restrictions = NULL      
-      )
-}
+      restrictions = NULL
+      )}
 
 
 # makes model element of CmmcMod
