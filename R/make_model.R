@@ -98,7 +98,7 @@ make_model_cmp <- function(model, restrictions = NULL, bounds = NULL, starting_v
 
 
 
-make_model_env <- function(model, restrictions = NULL, bounds = NULL, starting_values = NULL, is_file = FALSE, is_file_restrictions = FALSE) {
+make_model_env_cmp <- function(model, restrictions = NULL, bounds = NULL, starting_values = NULL, is_file = FALSE, is_file_restrictions = FALSE) {
   # read model:
   model_list <- make_model_list(model)
   # parameters that will be dsiplayed in the output:
@@ -160,7 +160,7 @@ make_model_env <- function(model, restrictions = NULL, bounds = NULL, starting_v
 
 
 
-make_model_env_cmp <- function(model, restrictions = NULL, bounds = NULL, starting_values = NULL, is_file = FALSE, is_file_restrictions = FALSE) {
+make_model_env <- function(model, restrictions = NULL, bounds = NULL, starting_values = NULL, is_file = FALSE, is_file_restrictions = FALSE) {
   # read model:
   model_list <- make_model_list(model)
   # parameters that will be dsiplayed in the output:
@@ -272,10 +272,10 @@ make_model_env2_cmp <- function(model, restrictions = NULL, bounds = NULL, start
   
   # return CmmcMod object:
   new("CmmcModEnv",
-      predict = predict,
-      objective = objective,
-      gradient = gradient,
-      hessian = hessian,
+      predict = compiler::cmpfun(predict),
+      objective = compiler::cmpfun(objective),
+      gradient = compiler::cmpfun(gradient),
+      hessian = compiler::cmpfun(hessian),
       model_environment = model_environment,
       model = model_list,
       bounds = c(bounds, starting_values),
@@ -283,7 +283,6 @@ make_model_env2_cmp <- function(model, restrictions = NULL, bounds = NULL, start
       restrictions = NULL      
       )
 }
-
 
 # makes model element of CmmcMod
 make_model_list <- function(model) {
