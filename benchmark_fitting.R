@@ -92,6 +92,7 @@ br2 <- make_model_cmp(mpt2)
 br3 <- make_model_env(mpt2)
 br4 <- make_model_env_cmp(mpt2)
 br5 <- make_model_env2_cmp(mpt2)
+br6 <- make_model_env3_cmp(mpt2)
 
 id <- sample(1:nrow(d.broeder), 1)
 p2 <- runif(7)
@@ -103,11 +104,13 @@ all.equal(fit_nlminb(br1, d.broeder[id,], p2), fit_nlminb(br2, d.broeder[id,], p
 all.equal(fit_nlminb(br1, d.broeder[id,], p2), fit_nlminb(br3, d.broeder[id,], p2))
 all.equal(fit_nlminb(br1, d.broeder[id,], p2), fit_nlminb(br4, d.broeder[id,], p2))
 all.equal(fit_nlminb(br1, d.broeder[id,], p2), fit_nlminb(br5, d.broeder[id,], p2))
+all.equal(fit_nlminb(br1, d.broeder[id,], p2), fit_nlminb_3(br6, d.broeder[id,], p2))
 
 microbenchmark(
   fit_nlminb(br1, d.broeder[id,], p2),
   fit_nlminb(br2, d.broeder[id,], p2),
   fit_nlminb(br3, d.broeder[id,], p2),
   fit_nlminb(br4, d.broeder[id,], p2),
-  fit_nlminb(br5, d.broeder[id,], p2)
+  fit_nlminb(br5, d.broeder[id,], p2),
+  fit_nlminb_3(br6, d.broeder[id,], p2)
   )

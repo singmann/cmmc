@@ -50,3 +50,23 @@ fit_nlminb <- function(model, data, start, use_gradient = TRUE, use_hessian = FA
     use_hessian = use_hessian,
     return = tmp)
 }
+
+fit_nlminb_3 <- function(model, data, start, use_gradient = TRUE, use_hessian = FALSE, control = list()) {
+  assign("data", data, envir = model@model_environment)
+  for (d in seq_along(data)) assign(paste("cmmc_data.", d, sep = ""), data[d], envir = model@model_environment)
+  tmp <- nlminb(start = start,
+         objective = model@objective, 
+         gradient = if (use_gradient) model@gradient else NULL,
+         hessian = if (use_hessian) model@hessian else NULL,
+         control = list(),
+         lower = model@bounds$lower_bound,
+         upper = model@bounds$upper_bound
+         )
+  list(
+    parameter = tmp$par, 
+    objective = tmp$objective, 
+    convergence = if (tmp$convergence == 0) TRUE else FALSE,
+    use_gradient = use_gradient,
+    use_hessian = use_hessian,
+    return = tmp)
+}
