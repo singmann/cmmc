@@ -4,7 +4,9 @@ Title: What the package does (short line)
 Version: 0.1
 Date: 2014-05-23
 Author: Who wrote it
-Depends: R (>= 2.15.2), methods
+Depends:
+    R (>= 2.15.2),
+    methods
 Maintainer: Who to complain to <yourfault@somewhere.net>
 Description: More about what it does (maybe more than one line)
 License: What license is it under?

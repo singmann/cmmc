@@ -6,9 +6,11 @@ str(mpt1, 2)
 
 data(rb.fig1.data, package = "MPTinR")
 
+fit_nlminb(mpt1, rb.fig1.data[1,], runif(3))
+
 fit(mpt1, rb.fig.data)
 
-fit_nlminb(mpt1, rb.fig1.data[1,], runif(3))
+
 
 get_start_values(mpt1@bounds, 1)
 
