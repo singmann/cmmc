@@ -34,4 +34,13 @@ Dn + (1-Dn)*(1-G5)
 five_point_mpt <- make_model(m.2htm)
 
 (f1 <- fit(five_point_mpt, d.broeder))
+f1$optinfo$optima
 f1$check_fits()
+
+(f2 <- fit(five_point_mpt, d.broeder, method="optimx", runs=5, control=list(method = c("nlminb", "bobyqa"), follow.on=TRUE)))
+f2$optinfo$optima
+f2$check_fits()
+
+f2$optinfo$five_best[[2]]
+
+all.equal(f1$coef, f2$coef, tolerance=0.001)

@@ -68,7 +68,7 @@ fit <- function(model, data, runs = 5,aggregated = TRUE,
   }
   #method(model = fitted$model,start = starting_values[[1]][[1]], use_gradient = use_gradient, use_hessian = use_hessian, control = control)
   
-  obtain_fits <- function(y) {
+  obtain_fits <- function(y, use_gradient, use_hessian) {
     assign("data", data[y,], envir = fitted$model@model_environment)
     for (d in seq_along(data[y,])) assign(paste("cmmc_data.", d, sep = ""), data[y,d], envir = fitted$model@model_environment)
     tmp <- obtain_individual_fits(fitted = fitted, runs = runs, starting_values[[y]], use_gradient = use_gradient, use_hessian = use_hessian, method = method, control = control)
@@ -82,17 +82,25 @@ fit <- function(model, data, runs = 5,aggregated = TRUE,
          returned = lapply(tmp, "[[", i = "returned"))
   }
   
-  fits <- lapply(seq_len(ndata), obtain_fits)
+  combine_fits <- function(old_fits, new_fits) {
+    list(parameter = c(old_fits$parameter, new_fits$parameter), df = rbind(old_fits$df, new_fits$df), returned = c(old_fits$returned, new_fits$returned))
+  }
+  
+  fits <- lapply(seq_len(ndata), obtain_fits, use_gradient = use_gradient, use_hessian = use_hessian)
   optima_ids <- vapply(fits, function(x) which(x[["df"]]$value == min(x[["df"]]$value))[1], -1)
   optima_df <- do.call("rbind", mapply(function(x, y) x[[2]][y,], fits, optima_ids, SIMPLIFY=FALSE))
-  optima_par <- do.call("rbind", mapply(function(x, y) x[[1]][[y]], fits, optima_ids, SIMPLIFY=FALSE))
   
   # obtain second fits if necessary
   if (refit && any(!optima_df$convergence)) {
     to_refit <- which(!optima_df$convergence)
-    ## to do!!
+    new_fits <- lapply(to_refit, obtain_fits, use_gradient = FALSE, use_hessian = FALSE)
+    for (i in seq_along(to_refit)) fits[[to_refit[i]]] <- combine_fits(fits[[to_refit[i]]], new_fits[[i]])
+    optima_ids <- vapply(fits, function(x) which(x[["df"]]$value == min(x[["df"]]$value))[1], -1)
+    optima_df <- do.call("rbind", mapply(function(x, y) x[[2]][y,], fits, optima_ids, SIMPLIFY=FALSE))
   }
+  optima_par <- do.call("rbind", mapply(function(x, y) x[[1]][[y]], fits, optima_ids, SIMPLIFY=FALSE))
   rownames(optima_df) <- data_names
+  
   fitted$optinfo$optima <- optima_df
   fitted$optinfo$five_best <- lapply(fits, function(x) {
     select <- order(x$df$value)[1:5]

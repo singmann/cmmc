@@ -1,4 +1,5 @@
 require(devtools)
+require(optimx)
 options(error = recover)
 options(error = NULL)
 load_all()
@@ -18,8 +19,11 @@ data(rb.fig1.data, package = "MPTinR")
 (m1 <- fit(mpt1, rb.fig1.data))
 (m2 <- fit(mpt1, rb.fig1.data[1,]))
 (m3 <- fit(mpt1, rb.fig1.data, aggregated=FALSE))
-
+m2$data
 m3$optinfo$optima
+names(m1)
+
+str(m1, 2)
 
 #mpt2 <- new("CmmcMod", mpt1)
 
