@@ -2,6 +2,9 @@
 ## virtual Classes needed for Slots:
 
 setClassUnion("OptionalList", c("list", "NULL"))
+# setClassUnion("OptionalMatrix", c("matrix", "NULL"))
+# setClassUnion("OptionalArray", c("array", "NULL"))
+# setClassUnion("OptionalData.frame", c("data.frame", "NULL"))
 #setClassUnion("OptionalFunction", c("function", "NULL"))
 
 ## Restriction
@@ -42,3 +45,53 @@ setClass("CmmcMod",
            model = "list",
            parameters_show = "character",
            restrictions = "OptionalList"))
+
+
+
+Cmmc <- setRefClass("Cmmc", 
+                    fields = list(
+                      model = "CmmcMod",
+                      data = "matrix",
+                      gof = "data.frame",
+                      coef = "matrix",
+                      vcov = "array",
+                      optinfo = "list",
+                      names = "character"
+                    ),
+                    methods = list(
+                      show = function(show_info = TRUE, show_data_message = TRUE, extra = NULL) {
+                        cat_per_type <- vapply(.self$model@model$model_list, length, 0)
+                        if (show_info) {
+                          cat("Fit of cmmc model '", .self$names[1], "' to '", .self$names[2], "'.\n", sep = "")                          
+                          cat(length(.self$model@model$model_list), "item type(s) with", min(cat_per_type), "to", max(cat_per_type), "categories/type. Total n =", sum(data), "\n\n")
+                        }
+                        if (!is.null(extra)) cat(extra, "\n", sep = "")
+                        cat("Goodness of fit:\n")
+                        t_gof <- colSums(.self$gof)
+                        t_gof <- c(t_gof, p = unname(pchisq(t_gof[2], t_gof[3], lower.tail=FALSE)))
+                        names(t_gof)[1:2] <- c("logLik", "G^2")
+                        print.default(prettyNum(t_gof, digits = 3), print.gap = 2L, quote = FALSE)
+                        cat("Parameters:\n")
+                        print.default(format(colMeans(.self$coef), digits = 3), print.gap = 2L, quote = FALSE)
+                        if (!is.null(extra)) cat("\n")
+                        if (show_data_message && nrow(.self$data) > 1) message("nrow(data) > 1, displaying summed/mean values.")
+                      }
+                    )
+)
+
+setClassUnion("OptionalCmmc", c("Cmmc", "NULL"))
+
+CmmcMulti <- setRefClass("CmmcMulti", 
+                         contains= "Cmmc",
+                         fields = list(
+                           aggregated_data = "logical",
+                           aggregated = "OptionalCmmc"
+                         ),
+                         methods = list(
+                           show = function() {
+                             callSuper(show_data_message = FALSE, extra = "Summed/Mean values")
+                             if (.self$aggregated_data) .self$aggregated$show(show_info = FALSE, extra = "Aggregated data:")
+                             #browser()
+                           }
+                         )
+)
