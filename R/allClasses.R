@@ -75,6 +75,13 @@ Cmmc <- setRefClass("Cmmc",
                         print.default(format(colMeans(.self$coef), digits = 3), print.gap = 2L, quote = FALSE)
                         if (!is.null(extra)) cat("\n")
                         if (show_data_message && nrow(.self$data) > 1) message("nrow(data) > 1, displaying summed/mean values.")
+                      },
+                      check_fits = function() {
+                        conv <- .self$optinfo$optima[,"convergence"]
+                        if (any(!conv)) {
+                          problem <- which(!conv)
+                          warning("The following datasets did not converge succesfully:\n", paste(paste(names(.self)[problem], .self$optinfo$optima[problem, "message"], sep = ": "), collapse = "\n"))  
+                        }
                       }
                     )
 )
@@ -95,3 +102,8 @@ CmmcMulti <- setRefClass("CmmcMulti",
                            }
                          )
 )
+
+## generics needed:
+setGeneric("names")
+setMethod("names", signature(x="Cmmc"),
+          function(x) rownames(x$data))

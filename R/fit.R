@@ -29,14 +29,14 @@ fit <- function(model, data, runs = 5,aggregated = TRUE,
   ndata <- nrow(data)
   if (multiFit) {
     if (!is.null(rownames(data))) data_names <- rownames(data)
-    else data_names <- paste0(data_name, ": ", seq_len(ndata))
+    else data_names <- paste0(data_name, "_", seq_len(ndata))
     if (aggregated) {
       data <- rbind(data, colSums(data))
       ndata <- nrow(data)
       data_names <- c(data_names, "aggregated")
     }
   } else data_names <- data_name
-  
+  rownames(data) <- data_names
   
   # check method and set to function
   method <- match.arg(method, choices=c("nlminb", "optimx"))
@@ -134,7 +134,7 @@ fit <- function(model, data, runs = 5,aggregated = TRUE,
           refit = refit
         ),
         aggregated_data = aggregated,
-        aggregated =           Cmmc$new(
+        aggregated = Cmmc$new(
           model = model,
           data = data[ndata,,drop = FALSE],
           names = c(model_name, data_name),
