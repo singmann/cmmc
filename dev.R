@@ -19,6 +19,8 @@ data(rb.fig1.data, package = "MPTinR")
 (m2 <- fit(mpt1, rb.fig1.data[1,]))
 (m3 <- fit(mpt1, rb.fig1.data, aggregated=FALSE))
 
+m3$optinfo$optima
+
 #mpt2 <- new("CmmcMod", mpt1)
 
 ls.str(mpt1@model_environment)

@@ -48,8 +48,9 @@ fit <- function(model, data, runs = 5,aggregated = TRUE,
     data = data,
     names = c(model_name, data_name),
     optinfo = list(
-      refit = refit,
-      five_best = list()
+      optima = NULL,
+      five_best = list(),
+      refit = refit
       )
     )
   ## obtain first fits:
@@ -91,7 +92,8 @@ fit <- function(model, data, runs = 5,aggregated = TRUE,
     to_refit <- which(!optima_df$convergence)
     ## to do!!
   }
-  
+  rownames(optima_df) <- data_names
+  fitted$optinfo$optima <- optima_df
   fitted$optinfo$five_best <- lapply(fits, function(x) {
     select <- order(x$df$value)[1:5]
     list(parameters = x[[1]][select], df = x[[2]][select,], returned = x[[3]][select])
@@ -127,8 +129,9 @@ fit <- function(model, data, runs = 5,aggregated = TRUE,
         coef = fitted$coef[-ndata,],
         vcov = fitted$vcov[,,-ndata],
         optinfo = list(
-          refit = refit,
-          five_best = fitted$optinfo$five_best[-ndata]
+          optima = fitted$optinfo$optima[-ndata,],
+          five_best = fitted$optinfo$five_best[-ndata],
+          refit = refit
         ),
         aggregated_data = aggregated,
         aggregated =           Cmmc$new(
@@ -139,8 +142,9 @@ fit <- function(model, data, runs = 5,aggregated = TRUE,
           coef = fitted$coef[ndata,,drop = FALSE],
           vcov = fitted$vcov[,,ndata,drop = FALSE],
           optinfo = list(
-            refit = refit,
-            five_best = fitted$optinfo$five_best[ndata]
+            optima = fitted$optinfo$optima[ndata,],
+            five_best = fitted$optinfo$five_best[ndata],
+            refit = refit
           )
         )
       )
