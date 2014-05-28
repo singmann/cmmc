@@ -44,3 +44,13 @@ f2$check_fits()
 f2$optinfo$five_best[[2]]
 
 all.equal(f1$coef, f2$coef, tolerance=0.001)
+
+require(MPTinR)
+data(d.broeder, package = "MPTinR")
+m.2htm <- system.file("extdata", "5points.2htm.model", package = "MPTinR")
+require(microbenchmark)
+
+microbenchmark(
+  fit.mpt(d.broeder, m.2htm, fit.aggregated=FALSE),
+  fit(five_point_mpt, d.broeder, aggregated=FALSE)
+)
